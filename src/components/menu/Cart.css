@@ -131,6 +131,39 @@
   background: #fecaca;
 }
 
+.cart-item-mods {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.35rem 0;
+}
+
+.cart-mod {
+  font-size: 0.75rem;
+  padding: 0.15rem 0;
+}
+
+.cart-mod.removed {
+  color: #dc2626;
+  font-style: italic;
+}
+
+.cart-mod.extra {
+  color: #059669;
+}
+
+.cart-mod.extra .mod-price {
+  margin-left: 0.35rem;
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.cart-mod.note {
+  color: #6b7280;
+  font-style: italic;
+}
+
 .cart-item-subtotal {
   grid-column: 1 / -1;
   text-align: right;

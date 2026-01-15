@@ -44,6 +44,16 @@ export interface MenuCategory {
   order: number;
 }
 
+// Tipo de ingrediente/modificador
+export type IngredientType = 'removable' | 'extra';
+
+export interface Ingredient {
+  id: string;
+  name: string;
+  type: IngredientType;
+  price?: number; // Solo para extras
+}
+
 export interface MenuItem {
   id: string;
   restaurantId: string;
@@ -54,6 +64,7 @@ export interface MenuItem {
   image?: string;
   isAvailable: boolean;
   preparationTime?: number; // minutos estimados
+  ingredients?: Ingredient[]; // Ingredientes disponibles para personalizar
 }
 
 // ==========================================
@@ -68,6 +79,8 @@ export interface OrderItem {
   notes?: string;
   unitPrice: number;
   subtotal: number;
+  removedIngredients?: Ingredient[]; // Ingredientes removidos ("sin...")
+  extraIngredients?: Ingredient[]; // Ingredientes extra ("extra...")
 }
 
 export interface Order {
@@ -109,6 +122,8 @@ export interface CartItem {
   menuItem: MenuItem;
   quantity: number;
   notes?: string;
+  removedIngredients?: Ingredient[]; // Ingredientes removidos ("sin...")
+  extraIngredients?: Ingredient[]; // Ingredientes extra ("extra...")
 }
 
 export interface Cart {
@@ -138,7 +153,13 @@ export interface OrdersContextType {
 export interface CartContextType {
   cart: Cart | null;
   initCart: (restaurantId: string, type: OrderType, tableId?: string, tableNumber?: number) => void;
-  addToCart: (menuItem: MenuItem, quantity?: number, notes?: string) => void;
+  addToCart: (
+    menuItem: MenuItem,
+    quantity?: number,
+    notes?: string,
+    removedIngredients?: Ingredient[],
+    extraIngredients?: Ingredient[]
+  ) => void;
   removeFromCart: (menuItemId: string) => void;
   updateQuantity: (menuItemId: string, quantity: number) => void;
   updateNotes: (menuItemId: string, notes: string) => void;
