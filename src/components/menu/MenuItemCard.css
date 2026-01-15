@@ -1,5 +1,20 @@
 .menu-item-card {
   margin-bottom: 0.75rem;
+  transition: opacity 0.2s ease;
+}
+
+.menu-item-unavailable {
+  opacity: 0.6;
+  background: #f9fafb;
+}
+
+.menu-item-unavailable .menu-item-name {
+  color: #9ca3af;
+}
+
+.menu-item-unavailable .menu-item-price {
+  color: #9ca3af;
+  text-decoration: line-through;
 }
 
 .menu-item-content {

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useOrders, useRestaurant } from '../../contexts';
+import { useOrders, useRestaurant, useProducts } from '../../contexts';
 import {
   getTablesByRestaurant,
   getCategoriesByRestaurant,
-  getMenuItemsByCategory,
 } from '../../data/mockData';
 import { OrderCard } from '../../components/orders';
 import { Card, Button, Input, Badge } from '../../components/ui';
@@ -12,6 +11,8 @@ import type { MenuItem, OrderItem, Table } from '../../types';
 import { formatPrice } from '../../utils/format';
 import { getInitialStatus } from '../../utils/orderHelpers';
 import './CashierPage.css';
+
+type CashierView = 'orders' | 'manual' | 'products';
 
 type ActionFeedback = {
   type: 'success' | 'error';
@@ -24,8 +25,9 @@ export const CashierPage: React.FC = () => {
   const navigate = useNavigate();
   const { restaurant, setActiveRestaurant, error: restaurantError } = useRestaurant();
   const { getPendingTableOrders, getOrdersByStatus, approveOrder, rejectOrder, addOrder } = useOrders();
+  const { getProductsByCategory, toggleProductAvailability, getProductsByRestaurant } = useProducts();
 
-  const [showManualOrder, setShowManualOrder] = useState(false);
+  const [currentView, setCurrentView] = useState<CashierView>('orders');
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [customerName, setCustomerName] = useState('');
   const [manualItems, setManualItems] = useState<{ item: MenuItem; qty: number }[]>([]);
@@ -53,6 +55,8 @@ export const CashierPage: React.FC = () => {
   const recentlyApproved = restaurantId
     ? getOrdersByStatus(restaurantId, ['APROBADO']).slice(0, 3)
     : [];
+  const allProducts = restaurantId ? getProductsByRestaurant(restaurantId) : [];
+  const unavailableCount = allProducts.filter(p => !p.isAvailable).length;
 
   if (!restaurant || restaurantError) {
     return (
@@ -167,7 +171,7 @@ export const CashierPage: React.FC = () => {
     });
 
     // Reset form
-    setShowManualOrder(false);
+    setCurrentView('orders');
     setSelectedTable(null);
     setCustomerName('');
     setManualItems([]);
@@ -222,10 +226,22 @@ export const CashierPage: React.FC = () => {
         </div>
         <div className="cashier-actions">
           <Button
-            variant={showManualOrder ? 'secondary' : 'primary'}
-            onClick={() => setShowManualOrder(!showManualOrder)}
+            variant={currentView === 'orders' ? 'primary' : 'ghost'}
+            onClick={() => setCurrentView('orders')}
           >
-            {showManualOrder ? 'Ver Pendientes' : 'Cargar Pedido Manual'}
+            Pedidos {pendingOrders.length > 0 && `(${pendingOrders.length})`}
+          </Button>
+          <Button
+            variant={currentView === 'manual' ? 'primary' : 'ghost'}
+            onClick={() => setCurrentView('manual')}
+          >
+            Pedido Manual
+          </Button>
+          <Button
+            variant={currentView === 'products' ? 'primary' : 'ghost'}
+            onClick={() => setCurrentView('products')}
+          >
+            Productos {unavailableCount > 0 && <Badge variant="warning" size="sm">{unavailableCount} pausados</Badge>}
           </Button>
           <Link to={`/${restaurantId}/cocina`}>
             <Button variant="secondary">Ir a Cocina</Button>
@@ -234,7 +250,7 @@ export const CashierPage: React.FC = () => {
       </header>
 
       <div className="cashier-content">
-        {showManualOrder ? (
+        {currentView === 'manual' && (
           <div className="manual-order-section">
             <Card className="manual-order-form" variant="elevated">
               <h2>Nuevo Pedido Manual</h2>
@@ -271,7 +287,7 @@ export const CashierPage: React.FC = () => {
                   <div key={category.id} className="menu-picker-category">
                     <h4>{category.name}</h4>
                     <div className="menu-picker-items">
-                      {getMenuItemsByCategory(category.id)
+                      {getProductsByCategory(category.id)
                         .filter(item => item.isAvailable)
                         .map(item => (
                           <button
@@ -328,7 +344,9 @@ export const CashierPage: React.FC = () => {
               )}
             </Card>
           </div>
-        ) : (
+        )}
+
+        {currentView === 'orders' && (
           <div className="pending-orders-section">
             <div className="section-header">
               <h2>
@@ -378,6 +396,65 @@ export const CashierPage: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {currentView === 'products' && (
+          <div className="products-management-section">
+            <div className="section-header">
+              <h2>Gestión de Productos</h2>
+              <p className="section-hint">
+                Pausá productos que no estén disponibles. Los clientes no podrán pedirlos hasta que los reactives.
+              </p>
+              {unavailableCount > 0 && (
+                <div className="unavailable-summary">
+                  <Badge variant="warning">{unavailableCount} producto{unavailableCount !== 1 ? 's' : ''} pausado{unavailableCount !== 1 ? 's' : ''}</Badge>
+                </div>
+              )}
+            </div>
+
+            <div className="products-by-category">
+              {categories.map(category => {
+                const categoryProducts = getProductsByCategory(category.id);
+                if (categoryProducts.length === 0) return null;
+
+                return (
+                  <Card key={category.id} className="category-products-card" variant="outlined">
+                    <h3 className="category-title">{category.name}</h3>
+                    <div className="products-list">
+                      {categoryProducts.map(product => (
+                        <div
+                          key={product.id}
+                          className={`product-row ${!product.isAvailable ? 'product-paused' : ''}`}
+                        >
+                          <div className="product-info">
+                            <span className="product-name">{product.name}</span>
+                            <span className="product-price">{formatPrice(product.price)}</span>
+                          </div>
+                          <button
+                            className={`toggle-btn ${product.isAvailable ? 'available' : 'paused'}`}
+                            onClick={() => toggleProductAvailability(product.id)}
+                            title={product.isAvailable ? 'Pausar producto' : 'Activar producto'}
+                          >
+                            {product.isAvailable ? (
+                              <>
+                                <span className="toggle-icon">✓</span>
+                                <span className="toggle-label">Disponible</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="toggle-icon">⏸</span>
+                                <span className="toggle-label">Pausado</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

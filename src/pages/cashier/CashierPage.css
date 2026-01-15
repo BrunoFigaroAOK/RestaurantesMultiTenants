@@ -453,6 +453,121 @@
   color: #1f2937;
 }
 
+/* Products Management Section */
+.products-management-section {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.unavailable-summary {
+  margin-top: 0.75rem;
+}
+
+.products-by-category {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.category-products-card {
+  padding: 1.25rem;
+}
+
+.category-title {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #374151;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.product-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.product-row:hover {
+  background: #f1f5f9;
+}
+
+.product-row.product-paused {
+  background: #fef3c7;
+  opacity: 0.85;
+}
+
+.product-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.product-name {
+  font-weight: 500;
+  color: #374151;
+}
+
+.product-paused .product-name {
+  color: #92400e;
+  text-decoration: line-through;
+}
+
+.product-price {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 130px;
+  justify-content: center;
+}
+
+.toggle-btn.available {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.toggle-btn.available:hover {
+  background: #a7f3d0;
+}
+
+.toggle-btn.paused {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.toggle-btn.paused:hover {
+  background: #fde68a;
+}
+
+.toggle-icon {
+  font-size: 1rem;
+}
+
+.toggle-label {
+  font-size: 0.8rem;
+}
+
 @media (max-width: 768px) {
   .cashier-header {
     padding: 1rem;
@@ -469,10 +584,22 @@
   .cashier-actions {
     width: 100%;
     justify-content: stretch;
+    flex-wrap: wrap;
   }
 
   .cashier-actions button,
   .cashier-actions a {
     flex: 1;
+    min-width: 45%;
+  }
+
+  .product-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .toggle-btn {
+    width: 100%;
   }
 }
