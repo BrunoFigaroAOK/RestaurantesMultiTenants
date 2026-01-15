@@ -167,3 +167,12 @@ export interface CartContextType {
   getTotal: () => number;
   getItemCount: () => number;
 }
+
+export interface ProductsContextType {
+  products: MenuItem[];
+  getProductsByRestaurant: (restaurantId: string) => MenuItem[];
+  getProductsByCategory: (categoryId: string) => MenuItem[];
+  getProductById: (productId: string) => MenuItem | undefined;
+  toggleProductAvailability: (productId: string) => void;
+  setProductAvailability: (productId: string, isAvailable: boolean) => void;
+}

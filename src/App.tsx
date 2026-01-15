@@ -1,14 +1,15 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { OrdersProvider, CartProvider, RestaurantProvider } from './contexts';
+import { OrdersProvider, CartProvider, RestaurantProvider, ProductsProvider } from './contexts';
 import { Home, LandingPage, MenuPage, CashierPage, KitchenPage } from './pages';
 import './App.css';
 
 function App() {
   return (
     <RestaurantProvider>
-      <OrdersProvider>
-        <CartProvider>
-          <BrowserRouter>
+      <ProductsProvider>
+        <OrdersProvider>
+          <CartProvider>
+            <BrowserRouter>
           <Routes>
             {/* Landing - Página comercial pública */}
             <Route path="/" element={<LandingPage />} />
@@ -28,9 +29,10 @@ function App() {
             {/* Vista Cocina */}
             <Route path="/:restaurantId/cocina" element={<KitchenPage />} />
           </Routes>
-          </BrowserRouter>
-        </CartProvider>
-      </OrdersProvider>
+            </BrowserRouter>
+          </CartProvider>
+        </OrdersProvider>
+      </ProductsProvider>
     </RestaurantProvider>
   );
 }

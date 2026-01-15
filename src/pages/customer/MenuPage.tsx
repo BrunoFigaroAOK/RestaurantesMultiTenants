@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCart, useOrders, useRestaurant } from '../../contexts';
+import { useCart, useOrders, useRestaurant, useProducts } from '../../contexts';
 import {
   getCategoriesByRestaurant,
-  getMenuItemsByCategory,
   getTableByNumber,
 } from '../../data/mockData';
 import { CategorySection, Cart, IngredientSelector } from '../../components/menu';
@@ -28,6 +27,7 @@ export const MenuPage: React.FC = () => {
   const { restaurant, setActiveRestaurant, error: restaurantError } = useRestaurant();
   const { cart, initCart, addToCart, clearCart, getTotal, getItemCount } = useCart();
   const { addOrder } = useOrders();
+  const { getProductsByCategory } = useProducts();
 
   const [showCheckout, setShowCheckout] = useState(false);
   const [customerName, setCustomerName] = useState('');
@@ -358,7 +358,7 @@ export const MenuPage: React.FC = () => {
             <CategorySection
               key={category.id}
               category={category}
-              items={getMenuItemsByCategory(category.id)}
+              items={getProductsByCategory(category.id)}
               onAddItem={handleAddItem}
             />
           ))}

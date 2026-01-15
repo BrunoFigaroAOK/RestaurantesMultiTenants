@@ -10,8 +10,10 @@ interface MenuItemCardProps {
 }
 
 export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onAdd }) => {
+  const cardClass = `menu-item-card ${!item.isAvailable ? 'menu-item-unavailable' : ''}`;
+
   return (
-    <Card className="menu-item-card" variant="outlined">
+    <Card className={cardClass} variant="outlined">
       <div className="menu-item-content">
         <div className="menu-item-info">
           <div className="menu-item-header">
