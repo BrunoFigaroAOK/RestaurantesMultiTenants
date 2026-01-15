@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Order, OrderStatus, OrdersContextType } from '../types';
 import { initialOrders } from '../data/mockData';
+import { isValidTransition, canApprove, canReject } from '../utils/orderHelpers';
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 
@@ -23,19 +24,30 @@ export const OrdersProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return newOrder;
   }, []);
 
-  const updateOrderStatus = useCallback((orderId: string, status: OrderStatus) => {
+  const updateOrderStatus = useCallback((orderId: string, newStatus: OrderStatus): boolean => {
+    let transitionSuccessful = false;
+
     setOrders(prev =>
       prev.map(order => {
         if (order.id !== orderId) return order;
 
+        // Validar transición
+        if (!isValidTransition(order.status, newStatus)) {
+          console.warn(
+            `Transición inválida: ${order.status} → ${newStatus} para pedido ${orderId}`
+          );
+          return order;
+        }
+
+        transitionSuccessful = true;
         const now = new Date();
         const updates: Partial<Order> = {
-          status,
+          status: newStatus,
           updatedAt: now,
         };
 
         // Registrar timestamps según el estado
-        switch (status) {
+        switch (newStatus) {
           case 'APROBADO':
             updates.approvedAt = now;
             break;
@@ -53,17 +65,29 @@ export const OrdersProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         return { ...order, ...updates };
       })
     );
+
+    return transitionSuccessful;
   }, []);
 
-  const approveOrder = useCallback((orderId: string) => {
-    updateOrderStatus(orderId, 'APROBADO');
-  }, [updateOrderStatus]);
+  const approveOrder = useCallback((orderId: string): boolean => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order || !canApprove(order.status)) {
+      console.warn(`No se puede aprobar pedido ${orderId} en estado ${order?.status}`);
+      return false;
+    }
+    return updateOrderStatus(orderId, 'APROBADO');
+  }, [orders, updateOrderStatus]);
 
-  const rejectOrder = useCallback((orderId: string) => {
-    // En lugar de eliminar, podríamos tener un estado RECHAZADO
-    // Por ahora simplemente lo eliminamos
-    setOrders(prev => prev.filter(order => order.id !== orderId));
-  }, []);
+  const rejectOrder = useCallback((orderId: string): boolean => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order || !canReject(order.status)) {
+      console.warn(`No se puede rechazar pedido ${orderId} en estado ${order?.status}`);
+      return false;
+    }
+    // Solo eliminar si está en estado CREADO
+    setOrders(prev => prev.filter(o => o.id !== orderId));
+    return true;
+  }, [orders]);
 
   const getOrdersByRestaurant = useCallback((restaurantId: string): Order[] => {
     return orders.filter(order => order.restaurantId === restaurantId);

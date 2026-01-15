@@ -126,9 +126,9 @@ export interface Cart {
 export interface OrdersContextType {
   orders: Order[];
   addOrder: (order: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>) => Order;
-  updateOrderStatus: (orderId: string, status: OrderStatus) => void;
-  approveOrder: (orderId: string) => void;
-  rejectOrder: (orderId: string) => void;
+  updateOrderStatus: (orderId: string, status: OrderStatus) => boolean;
+  approveOrder: (orderId: string) => boolean;
+  rejectOrder: (orderId: string) => boolean;
   getOrdersByRestaurant: (restaurantId: string) => Order[];
   getOrdersByStatus: (restaurantId: string, statuses: OrderStatus[]) => Order[];
   getPendingTableOrders: (restaurantId: string) => Order[];

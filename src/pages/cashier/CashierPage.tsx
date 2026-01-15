@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useOrders } from '../../contexts';
+import { useOrders, useRestaurant } from '../../contexts';
 import {
-  getRestaurantById,
   getTablesByRestaurant,
   getCategoriesByRestaurant,
   getMenuItemsByCategory,
@@ -11,28 +10,56 @@ import { OrderCard } from '../../components/orders';
 import { Card, Button, Input, Badge } from '../../components/ui';
 import type { MenuItem, OrderItem, Table } from '../../types';
 import { formatPrice } from '../../utils/format';
+import { getInitialStatus } from '../../utils/orderHelpers';
 import './CashierPage.css';
+
+type ActionFeedback = {
+  type: 'success' | 'error';
+  message: string;
+  orderId?: string;
+} | null;
 
 export const CashierPage: React.FC = () => {
   const { restaurantId } = useParams<{ restaurantId: string }>();
   const navigate = useNavigate();
-  const { getPendingTableOrders, approveOrder, rejectOrder, addOrder } = useOrders();
+  const { restaurant, setActiveRestaurant, error: restaurantError } = useRestaurant();
+  const { getPendingTableOrders, getOrdersByStatus, approveOrder, rejectOrder, addOrder } = useOrders();
 
   const [showManualOrder, setShowManualOrder] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [customerName, setCustomerName] = useState('');
   const [manualItems, setManualItems] = useState<{ item: MenuItem; qty: number }[]>([]);
+  const [confirmAction, setConfirmAction] = useState<{ type: 'approve' | 'reject'; orderId: string } | null>(null);
+  const [feedback, setFeedback] = useState<ActionFeedback>(null);
 
-  const restaurant = restaurantId ? getRestaurantById(restaurantId) : null;
+  // Sincronizar restaurante activo con la ruta
+  useEffect(() => {
+    if (restaurantId) {
+      setActiveRestaurant(restaurantId);
+    }
+  }, [restaurantId, setActiveRestaurant]);
+
+  // Limpiar feedback después de 3 segundos
+  useEffect(() => {
+    if (feedback) {
+      const timer = setTimeout(() => setFeedback(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [feedback]);
+
   const tables = restaurantId ? getTablesByRestaurant(restaurantId) : [];
   const categories = restaurantId ? getCategoriesByRestaurant(restaurantId) : [];
   const pendingOrders = restaurantId ? getPendingTableOrders(restaurantId) : [];
+  const recentlyApproved = restaurantId
+    ? getOrdersByStatus(restaurantId, ['APROBADO']).slice(0, 3)
+    : [];
 
-  if (!restaurant) {
+  if (!restaurant || restaurantError) {
     return (
       <div className="cashier-page">
         <Card className="error-card">
           <h2>Restaurante no encontrado</h2>
+          <p>{restaurantError || 'El restaurante solicitado no existe.'}</p>
           <Button onClick={() => navigate('/')}>Volver al inicio</Button>
         </Card>
       </div>
@@ -70,6 +97,42 @@ export const CashierPage: React.FC = () => {
     0
   );
 
+  const handleApproveOrder = (orderId: string) => {
+    setConfirmAction({ type: 'approve', orderId });
+  };
+
+  const handleRejectOrder = (orderId: string) => {
+    setConfirmAction({ type: 'reject', orderId });
+  };
+
+  const handleConfirmAction = () => {
+    if (!confirmAction) return;
+
+    const { type, orderId } = confirmAction;
+
+    if (type === 'approve') {
+      const success = approveOrder(orderId);
+      setFeedback({
+        type: success ? 'success' : 'error',
+        message: success ? 'Pedido aprobado - Enviado a cocina' : 'Error al aprobar pedido',
+        orderId,
+      });
+    } else {
+      const success = rejectOrder(orderId);
+      setFeedback({
+        type: success ? 'success' : 'error',
+        message: success ? 'Pedido rechazado' : 'Error al rechazar pedido',
+        orderId,
+      });
+    }
+
+    setConfirmAction(null);
+  };
+
+  const handleCancelAction = () => {
+    setConfirmAction(null);
+  };
+
   const handleSubmitManualOrder = () => {
     if (!selectedTable || !customerName.trim() || manualItems.length === 0) return;
 
@@ -89,13 +152,18 @@ export const CashierPage: React.FC = () => {
     addOrder({
       restaurantId: restaurant.id,
       type: 'MESA',
-      status: 'APROBADO', // Pedido manual entra aprobado
+      status: getInitialStatus('MESA', true), // Pedido manual entra APROBADO
       customerName: customerName.trim(),
       tableId: selectedTable.id,
       tableNumber: selectedTable.number,
       items: orderItems,
       total: manualTotal,
       estimatedTime: maxPrepTime,
+    });
+
+    setFeedback({
+      type: 'success',
+      message: `Pedido para Mesa ${selectedTable.number} creado y enviado a cocina`,
     });
 
     // Reset form
@@ -107,6 +175,45 @@ export const CashierPage: React.FC = () => {
 
   return (
     <div className="cashier-page">
+      {/* Feedback Toast */}
+      {feedback && (
+        <div className={`feedback-toast feedback-${feedback.type}`}>
+          <span className="feedback-icon">
+            {feedback.type === 'success' ? '✓' : '✕'}
+          </span>
+          <span>{feedback.message}</span>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <div className="confirm-overlay">
+          <Card className="confirm-modal" variant="elevated">
+            <h3>
+              {confirmAction.type === 'approve'
+                ? '¿Aprobar este pedido?'
+                : '¿Rechazar este pedido?'}
+            </h3>
+            <p>
+              {confirmAction.type === 'approve'
+                ? 'El pedido será enviado a cocina para su preparación.'
+                : 'El pedido será eliminado permanentemente.'}
+            </p>
+            <div className="confirm-actions">
+              <Button variant="ghost" onClick={handleCancelAction}>
+                Cancelar
+              </Button>
+              <Button
+                variant={confirmAction.type === 'approve' ? 'success' : 'danger'}
+                onClick={handleConfirmAction}
+              >
+                {confirmAction.type === 'approve' ? 'Sí, aprobar' : 'Sí, rechazar'}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
       <header className="cashier-header">
         <div className="cashier-header-content">
           <Link to="/" className="back-link">← Inicio</Link>
@@ -131,6 +238,9 @@ export const CashierPage: React.FC = () => {
           <div className="manual-order-section">
             <Card className="manual-order-form" variant="elevated">
               <h2>Nuevo Pedido Manual</h2>
+              <p className="form-hint">
+                Los pedidos manuales se envían directamente a cocina como APROBADOS.
+              </p>
 
               <div className="form-group">
                 <label>Seleccionar Mesa *</label>
@@ -212,7 +322,7 @@ export const CashierPage: React.FC = () => {
                     onClick={handleSubmitManualOrder}
                     disabled={!selectedTable || !customerName.trim()}
                   >
-                    Crear Pedido (Aprobado)
+                    Crear Pedido y Enviar a Cocina
                   </Button>
                 </div>
               )}
@@ -220,17 +330,23 @@ export const CashierPage: React.FC = () => {
           </div>
         ) : (
           <div className="pending-orders-section">
-            <h2>
-              Pedidos Pendientes de Aprobación
-              {pendingOrders.length > 0 && (
-                <Badge variant="warning" pulse>{pendingOrders.length}</Badge>
-              )}
-            </h2>
+            <div className="section-header">
+              <h2>
+                Pedidos Pendientes de Aprobación
+                {pendingOrders.length > 0 && (
+                  <Badge variant="warning" pulse>{pendingOrders.length}</Badge>
+                )}
+              </h2>
+              <p className="section-hint">
+                Estos pedidos fueron realizados por clientes desde mesa (QR) y requieren aprobación.
+              </p>
+            </div>
 
             {pendingOrders.length === 0 ? (
               <Card className="empty-state" variant="outlined">
                 <span className="empty-icon">✓</span>
                 <p>No hay pedidos pendientes de aprobación</p>
+                <span className="empty-hint">Los pedidos de mesa aparecerán aquí</span>
               </Card>
             ) : (
               <div className="orders-grid">
@@ -238,10 +354,28 @@ export const CashierPage: React.FC = () => {
                   <OrderCard
                     key={order.id}
                     order={order}
-                    onApprove={approveOrder}
-                    onReject={rejectOrder}
+                    onApprove={handleApproveOrder}
+                    onReject={handleRejectOrder}
                   />
                 ))}
+              </div>
+            )}
+
+            {/* Mostrar pedidos aprobados recientemente */}
+            {recentlyApproved.length > 0 && (
+              <div className="recently-approved">
+                <h3>Enviados a Cocina Recientemente</h3>
+                <div className="approved-list">
+                  {recentlyApproved.map(order => (
+                    <div key={order.id} className="approved-item">
+                      <Badge variant="success" size="sm">Aprobado</Badge>
+                      <span className="approved-info">
+                        {order.type === 'MESA' ? `Mesa ${order.tableNumber}` : 'Delivery'} - {order.customerName}
+                      </span>
+                      <span className="approved-total">{formatPrice(order.total)}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
