@@ -1,0 +1,151 @@
+.home-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.home-header h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem 0;
+}
+
+.home-header p {
+  color: #6b7280;
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+.home-section {
+  margin-bottom: 3rem;
+}
+
+.home-section h2 {
+  font-size: 1.5rem;
+  color: #1f2937;
+  margin: 0 0 1.5rem 0;
+}
+
+.restaurant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.restaurant-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.restaurant-info {
+  margin-bottom: 1rem;
+}
+
+.restaurant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.restaurant-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.restaurant-address,
+.restaurant-phone {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.restaurant-links {
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.restaurant-links h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.link-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.link-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  min-width: 50px;
+}
+
+.link-item {
+  padding: 0.375rem 0.75rem;
+  background: #f1f5f9;
+  border-radius: 6px;
+  color: #667eea;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.link-item:hover {
+  background: #e0e7ff;
+}
+
+.link-staff {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.link-staff:hover {
+  background: #fde68a;
+}
+
+.demo-section ul {
+  margin: 1rem 0 0 0;
+  padding-left: 1.5rem;
+}
+
+.demo-section li {
+  margin-bottom: 0.5rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.demo-section p {
+  color: #4b5563;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .home-page {
+    padding: 1rem;
+  }
+
+  .home-header h1 {
+    font-size: 2rem;
+  }
+
+  .restaurant-grid {
+    grid-template-columns: 1fr;
+  }
+}
