@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { OrdersProvider, CartProvider, RestaurantProvider } from './contexts';
-import { Home, MenuPage, CashierPage, KitchenPage } from './pages';
+import { Home, LandingPage, MenuPage, CashierPage, KitchenPage } from './pages';
 import './App.css';
 
 function App() {
@@ -10,8 +10,11 @@ function App() {
         <CartProvider>
           <BrowserRouter>
           <Routes>
-            {/* Home - Selección de restaurante */}
-            <Route path="/" element={<Home />} />
+            {/* Landing - Página comercial pública */}
+            <Route path="/" element={<LandingPage />} />
+
+            {/* Demo - Selección de restaurante */}
+            <Route path="/demo" element={<Home />} />
 
             {/* Menú Delivery (sin mesa) */}
             <Route path="/:restaurantId/menu" element={<MenuPage />} />
