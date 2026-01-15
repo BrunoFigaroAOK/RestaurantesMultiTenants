@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useOrders, useRestaurant, useProducts } from '../../contexts';
 import {
@@ -8,11 +8,11 @@ import {
 import { OrderCard } from '../../components/orders';
 import { Card, Button, Input, Badge } from '../../components/ui';
 import type { MenuItem, OrderItem, Table } from '../../types';
-import { formatPrice } from '../../utils/format';
+import { formatPrice, formatTimeAgo } from '../../utils/format';
 import { getInitialStatus } from '../../utils/orderHelpers';
 import './CashierPage.css';
 
-type CashierView = 'orders' | 'manual' | 'products';
+type CashierView = 'orders' | 'active' | 'manual' | 'products';
 
 type ActionFeedback = {
   type: 'success' | 'error';
@@ -57,6 +57,20 @@ export const CashierPage: React.FC = () => {
     : [];
   const allProducts = restaurantId ? getProductsByRestaurant(restaurantId) : [];
   const unavailableCount = allProducts.filter(p => !p.isAvailable).length;
+
+  // Pedidos activos (en cocina) - para vista de seguimiento
+  const activeOrders = useMemo(() => {
+    if (!restaurantId) return { aprobados: [], preparando: [], listos: [], total: 0 };
+    const aprobados = getOrdersByStatus(restaurantId, ['APROBADO']);
+    const preparando = getOrdersByStatus(restaurantId, ['PREPARANDO']);
+    const listos = getOrdersByStatus(restaurantId, ['LISTO']);
+    return {
+      aprobados,
+      preparando,
+      listos,
+      total: aprobados.length + preparando.length + listos.length,
+    };
+  }, [restaurantId, getOrdersByStatus]);
 
   if (!restaurant || restaurantError) {
     return (
@@ -229,19 +243,25 @@ export const CashierPage: React.FC = () => {
             variant={currentView === 'orders' ? 'primary' : 'ghost'}
             onClick={() => setCurrentView('orders')}
           >
-            Pedidos {pendingOrders.length > 0 && `(${pendingOrders.length})`}
+            Aprobar {pendingOrders.length > 0 && <Badge variant="warning" size="sm">{pendingOrders.length}</Badge>}
+          </Button>
+          <Button
+            variant={currentView === 'active' ? 'primary' : 'ghost'}
+            onClick={() => setCurrentView('active')}
+          >
+            En Cocina {activeOrders.total > 0 && <Badge variant="info" size="sm">{activeOrders.total}</Badge>}
           </Button>
           <Button
             variant={currentView === 'manual' ? 'primary' : 'ghost'}
             onClick={() => setCurrentView('manual')}
           >
-            Pedido Manual
+            Nuevo Pedido
           </Button>
           <Button
             variant={currentView === 'products' ? 'primary' : 'ghost'}
             onClick={() => setCurrentView('products')}
           >
-            Productos {unavailableCount > 0 && <Badge variant="warning" size="sm">{unavailableCount} pausados</Badge>}
+            Productos {unavailableCount > 0 && <Badge variant="warning" size="sm">{unavailableCount}</Badge>}
           </Button>
           <Link to={`/${restaurantId}/cocina`}>
             <Button variant="secondary">Ir a Cocina</Button>
@@ -393,6 +413,114 @@ export const CashierPage: React.FC = () => {
                       <span className="approved-total">{formatPrice(order.total)}</span>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {currentView === 'active' && (
+          <div className="active-orders-section">
+            <div className="section-header">
+              <h2>Pedidos en Cocina</h2>
+              <p className="section-hint">
+                Vista de seguimiento. Los cambios de estado se realizan desde la cocina.
+              </p>
+            </div>
+
+            {activeOrders.total === 0 ? (
+              <Card className="empty-state" variant="outlined">
+                <span className="empty-icon">👨‍🍳</span>
+                <p>No hay pedidos activos en cocina</p>
+                <span className="empty-hint">Los pedidos aprobados aparecerán aquí</span>
+              </Card>
+            ) : (
+              <div className="active-orders-grid">
+                {/* Columna Por Preparar */}
+                <div className="active-column">
+                  <div className="active-column-header status-aprobado">
+                    <span className="column-title">Por Preparar</span>
+                    <Badge variant="info">{activeOrders.aprobados.length}</Badge>
+                  </div>
+                  <div className="active-column-content">
+                    {activeOrders.aprobados.map(order => (
+                      <div key={order.id} className="active-order-card">
+                        <div className="active-order-type">
+                          {order.type === 'MESA' ? (
+                            <span className="type-mesa">Mesa {order.tableNumber}</span>
+                          ) : (
+                            <span className="type-delivery">Delivery</span>
+                          )}
+                        </div>
+                        <div className="active-order-customer">{order.customerName}</div>
+                        <div className="active-order-meta">
+                          <span className="active-order-time">{formatTimeAgo(order.createdAt)}</span>
+                          <Badge variant="info" size="sm">Pendiente</Badge>
+                        </div>
+                      </div>
+                    ))}
+                    {activeOrders.aprobados.length === 0 && (
+                      <div className="active-empty">Sin pedidos</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Columna Preparando */}
+                <div className="active-column">
+                  <div className="active-column-header status-preparando">
+                    <span className="column-title">Preparando</span>
+                    <Badge variant="primary">{activeOrders.preparando.length}</Badge>
+                  </div>
+                  <div className="active-column-content">
+                    {activeOrders.preparando.map(order => (
+                      <div key={order.id} className="active-order-card preparing">
+                        <div className="active-order-type">
+                          {order.type === 'MESA' ? (
+                            <span className="type-mesa">Mesa {order.tableNumber}</span>
+                          ) : (
+                            <span className="type-delivery">Delivery</span>
+                          )}
+                        </div>
+                        <div className="active-order-customer">{order.customerName}</div>
+                        <div className="active-order-meta">
+                          <span className="active-order-time">{formatTimeAgo(order.createdAt)}</span>
+                          <Badge variant="primary" size="sm">En cocina</Badge>
+                        </div>
+                      </div>
+                    ))}
+                    {activeOrders.preparando.length === 0 && (
+                      <div className="active-empty">Sin pedidos</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Columna Listos */}
+                <div className="active-column">
+                  <div className="active-column-header status-listo">
+                    <span className="column-title">Listos para Entregar</span>
+                    <Badge variant="success">{activeOrders.listos.length}</Badge>
+                  </div>
+                  <div className="active-column-content">
+                    {activeOrders.listos.map(order => (
+                      <div key={order.id} className="active-order-card ready">
+                        <div className="active-order-type">
+                          {order.type === 'MESA' ? (
+                            <span className="type-mesa">Mesa {order.tableNumber}</span>
+                          ) : (
+                            <span className="type-delivery">Delivery</span>
+                          )}
+                        </div>
+                        <div className="active-order-customer">{order.customerName}</div>
+                        <div className="active-order-meta">
+                          <span className="active-order-time">{formatTimeAgo(order.createdAt)}</span>
+                          <Badge variant="success" size="sm">Listo</Badge>
+                        </div>
+                      </div>
+                    ))}
+                    {activeOrders.listos.length === 0 && (
+                      <div className="active-empty">Sin pedidos</div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

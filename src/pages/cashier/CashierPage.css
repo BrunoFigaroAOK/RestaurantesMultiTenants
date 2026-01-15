@@ -143,7 +143,14 @@
 
 .cashier-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cashier-actions > button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .cashier-actions a {
@@ -566,6 +573,127 @@
 
 .toggle-label {
   font-size: 0.8rem;
+}
+
+/* Active Orders Section */
+.active-orders-section {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.active-orders-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.active-column {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.active-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 2px solid;
+}
+
+.active-column-header.status-aprobado {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.active-column-header.status-preparando {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.active-column-header.status-listo {
+  background: #d1fae5;
+  border-color: #10b981;
+}
+
+.column-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.active-column-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 200px;
+}
+
+.active-order-card {
+  padding: 0.875rem 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+}
+
+.active-order-card.preparing {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.active-order-card.ready {
+  border-left-color: #10b981;
+  background: #ecfdf5;
+}
+
+.active-order-type {
+  margin-bottom: 0.25rem;
+}
+
+.type-mesa {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.type-delivery {
+  font-weight: 600;
+  color: #7c3aed;
+}
+
+.active-order-customer {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.active-order-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.active-order-time {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.active-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 1024px) {
+  .active-orders-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .active-column-content {
+    min-height: auto;
+  }
 }
 
 @media (max-width: 768px) {

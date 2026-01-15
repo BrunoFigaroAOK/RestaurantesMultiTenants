@@ -11,8 +11,8 @@
 
 .order-card-new {
   border-left: 4px solid #22c55e;
-  animation: newOrderPulse 1s ease-in-out 3;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
+  animation: newOrderPulse 0.8s ease-in-out 2;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
 }
 
 .order-card-new::before {
@@ -20,30 +20,22 @@
   position: absolute;
   top: -8px;
   right: 16px;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  background: #22c55e;
   color: white;
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 2px 8px;
   border-radius: 4px;
-  letter-spacing: 0.5px;
-  animation: badgeBounce 0.5s ease-in-out;
+  letter-spacing: 0.3px;
 }
 
 @keyframes newOrderPulse {
   0%, 100% {
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
-    transform: scale(1);
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.15);
-    transform: scale(1.01);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
   }
-}
-
-@keyframes badgeBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
 }
 
 @keyframes shake {
