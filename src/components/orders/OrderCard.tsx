@@ -7,6 +7,7 @@ import './OrderCard.css';
 interface OrderCardProps {
   order: Order;
   showActions?: boolean;
+  isNew?: boolean;
   onApprove?: (orderId: string) => void;
   onReject?: (orderId: string) => void;
   onStatusChange?: (orderId: string, status: OrderStatus) => void;
@@ -23,6 +24,7 @@ const statusConfig: Record<OrderStatus, { label: string; variant: 'default' | 'p
 export const OrderCard: React.FC<OrderCardProps> = ({
   order,
   showActions = true,
+  isNew = false,
   onApprove,
   onReject,
   onStatusChange,
@@ -44,9 +46,15 @@ export const OrderCard: React.FC<OrderCardProps> = ({
     ENTREGADO: 'Entregar',
   };
 
+  const cardClasses = [
+    'order-card',
+    isNew && 'order-card-new',
+    isDelayed && 'order-card-delayed',
+  ].filter(Boolean).join(' ');
+
   return (
     <Card
-      className={`order-card ${isDelayed ? 'order-card-delayed' : ''}`}
+      className={cardClasses}
       variant="elevated"
     >
       <div className="order-header">

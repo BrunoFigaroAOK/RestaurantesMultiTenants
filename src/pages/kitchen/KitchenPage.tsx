@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useOrders, useRestaurant } from '../../contexts';
+import { useNewOrderAlert } from '../../hooks';
 import { OrderCard } from '../../components/orders';
 import { Card, Button, Badge } from '../../components/ui';
 import type { OrderStatus, Order } from '../../types';
@@ -34,6 +35,9 @@ export const KitchenPage: React.FC = () => {
   }, [feedback]);
 
   const allOrders = restaurantId ? getKitchenOrders(restaurantId) : [];
+
+  // Hook para alertas de nuevos pedidos (sonido + animación)
+  const { isNewOrder } = useNewOrderAlert(allOrders);
 
   // Calcular estadísticas con memoización
   const stats = useMemo(() => {
@@ -175,6 +179,7 @@ export const KitchenPage: React.FC = () => {
               <OrderCard
                 key={order.id}
                 order={order}
+                isNew={isNewOrder(order.id)}
                 onStatusChange={handleStatusChange}
               />
             ))}
@@ -200,6 +205,7 @@ export const KitchenPage: React.FC = () => {
               <OrderCard
                 key={order.id}
                 order={order}
+                isNew={isNewOrder(order.id)}
                 onStatusChange={handleStatusChange}
               />
             ))}
@@ -225,6 +231,7 @@ export const KitchenPage: React.FC = () => {
               <OrderCard
                 key={order.id}
                 order={order}
+                isNew={isNewOrder(order.id)}
                 onStatusChange={handleStatusChange}
               />
             ))}
