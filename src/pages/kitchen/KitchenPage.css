@@ -1,0 +1,236 @@
+.kitchen-page {
+  min-height: 100vh;
+  background: #f1f5f9;
+}
+
+.kitchen-header {
+  background: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.kitchen-header-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.kitchen-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.kitchen-actions a {
+  text-decoration: none;
+}
+
+.error-card {
+  max-width: 500px;
+  margin: 2rem auto;
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+/* Stats */
+.kitchen-stats {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  justify-content: center;
+}
+
+.stat-card {
+  background: white;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-preparing {
+  border-top: 3px solid #667eea;
+}
+
+.stat-preparing .stat-value {
+  color: #667eea;
+}
+
+.stat-ready {
+  border-top: 3px solid #10b981;
+}
+
+.stat-ready .stat-value {
+  color: #10b981;
+}
+
+/* Filters */
+.kitchen-filters {
+  padding: 0 2rem;
+  margin-bottom: 1rem;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-right: 0.5rem;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 9999px;
+  background: white;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-btn:hover {
+  border-color: #667eea;
+}
+
+.filter-btn.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+/* Kanban Board */
+.kitchen-kanban {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding: 1rem 2rem 2rem;
+  min-height: calc(100vh - 250px);
+}
+
+.kanban-column {
+  background: #e2e8f0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kanban-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: white;
+}
+
+.kanban-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.kanban-pending h2 {
+  color: #1d4ed8;
+}
+
+.kanban-preparing h2 {
+  color: #667eea;
+}
+
+.kanban-ready h2 {
+  color: #059669;
+}
+
+.kanban-content {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.kanban-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .kitchen-kanban {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .kanban-column {
+    min-height: auto;
+  }
+
+  .kanban-content {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .kitchen-header {
+    padding: 1rem;
+  }
+
+  .kitchen-stats {
+    padding: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    flex: 1;
+    min-width: 100px;
+    padding: 0.75rem 1rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .kitchen-filters {
+    padding: 0 1rem;
+  }
+
+  .kitchen-kanban {
+    padding: 1rem;
+  }
+}
