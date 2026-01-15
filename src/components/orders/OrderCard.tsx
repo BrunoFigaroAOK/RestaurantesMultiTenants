@@ -78,15 +78,38 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       </div>
 
       <div className="order-items">
-        {order.items.map(item => (
-          <div key={item.id} className="order-item">
-            <span className="order-item-qty">{item.quantity}x</span>
-            <span className="order-item-name">{item.menuItem.name}</span>
-            {item.notes && (
-              <span className="order-item-notes">"{item.notes}"</span>
-            )}
-          </div>
-        ))}
+        {order.items.map(item => {
+          const hasModifications =
+            (item.removedIngredients && item.removedIngredients.length > 0) ||
+            (item.extraIngredients && item.extraIngredients.length > 0) ||
+            (item.notes && item.notes.trim().length > 0);
+
+          return (
+            <div key={item.id} className="order-item">
+              <div className="order-item-main">
+                <span className="order-item-qty">{item.quantity}x</span>
+                <span className="order-item-name">{item.menuItem.name}</span>
+              </div>
+              {hasModifications && (
+                <div className="order-item-mods">
+                  {item.removedIngredients?.map(ing => (
+                    <span key={ing.id} className="order-mod removed">
+                      – sin {ing.name}
+                    </span>
+                  ))}
+                  {item.extraIngredients?.map(ing => (
+                    <span key={ing.id} className="order-mod extra">
+                      + extra {ing.name}
+                    </span>
+                  ))}
+                  {item.notes && (
+                    <span className="order-mod note">📝 {item.notes}</span>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="order-footer">

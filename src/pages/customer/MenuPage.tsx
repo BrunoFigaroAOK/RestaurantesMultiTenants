@@ -6,9 +6,9 @@ import {
   getMenuItemsByCategory,
   getTableByNumber,
 } from '../../data/mockData';
-import { CategorySection, Cart } from '../../components/menu';
+import { CategorySection, Cart, IngredientSelector } from '../../components/menu';
 import { Card, Button, Input, Textarea, Badge } from '../../components/ui';
-import type { MenuItem, OrderItem, OrderStatus } from '../../types';
+import type { MenuItem, OrderItem, OrderStatus, Ingredient } from '../../types';
 import { getInitialStatus } from '../../utils/orderHelpers';
 import { formatPrice } from '../../utils/format';
 import './MenuPage.css';
@@ -37,6 +37,12 @@ export const MenuPage: React.FC = () => {
   const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [itemAdded, setItemAdded] = useState<string | null>(null);
+
+  // Estado para el modal de ingredientes
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [removedIngredients, setRemovedIngredients] = useState<Ingredient[]>([]);
+  const [extraIngredients, setExtraIngredients] = useState<Ingredient[]>([]);
+  const [itemNotes, setItemNotes] = useState('');
 
   const isTableOrder = !!tableNumber;
   const table = isTableOrder && restaurantId
@@ -97,8 +103,59 @@ export const MenuPage: React.FC = () => {
   }
 
   const handleAddItem = (item: MenuItem) => {
-    addToCart(item);
-    setItemAdded(item.name);
+    // Si el producto tiene ingredientes, mostrar modal de personalización
+    if (item.ingredients && item.ingredients.length > 0) {
+      setSelectedItem(item);
+      setRemovedIngredients([]);
+      setExtraIngredients([]);
+      setItemNotes('');
+    } else {
+      // Sin ingredientes, agregar directo
+      addToCart(item);
+      setItemAdded(item.name);
+    }
+  };
+
+  const handleToggleRemoved = (ingredient: Ingredient) => {
+    setRemovedIngredients(prev =>
+      prev.some(i => i.id === ingredient.id)
+        ? prev.filter(i => i.id !== ingredient.id)
+        : [...prev, ingredient]
+    );
+  };
+
+  const handleToggleExtra = (ingredient: Ingredient) => {
+    setExtraIngredients(prev =>
+      prev.some(i => i.id === ingredient.id)
+        ? prev.filter(i => i.id !== ingredient.id)
+        : [...prev, ingredient]
+    );
+  };
+
+  const handleConfirmItem = () => {
+    if (!selectedItem) return;
+    addToCart(
+      selectedItem,
+      1,
+      itemNotes.trim() || undefined,
+      removedIngredients.length > 0 ? removedIngredients : undefined,
+      extraIngredients.length > 0 ? extraIngredients : undefined
+    );
+    setItemAdded(selectedItem.name);
+    setSelectedItem(null);
+  };
+
+  const handleCancelItem = () => {
+    setSelectedItem(null);
+    setRemovedIngredients([]);
+    setExtraIngredients([]);
+    setItemNotes('');
+  };
+
+  const getItemTotalPrice = () => {
+    if (!selectedItem) return 0;
+    const extrasTotal = extraIngredients.reduce((sum, ing) => sum + (ing.price || 0), 0);
+    return selectedItem.price + extrasTotal;
   };
 
   const handleCheckout = () => {
@@ -138,15 +195,21 @@ export const MenuPage: React.FC = () => {
     if (!cart || cart.items.length === 0) return;
     if (!validateForm()) return;
 
-    const orderItems: OrderItem[] = cart.items.map((item, index) => ({
-      id: `oi-${Date.now()}-${index}`,
-      menuItemId: item.menuItem.id,
-      menuItem: item.menuItem,
-      quantity: item.quantity,
-      notes: item.notes,
-      unitPrice: item.menuItem.price,
-      subtotal: item.menuItem.price * item.quantity,
-    }));
+    const orderItems: OrderItem[] = cart.items.map((item, index) => {
+      const extrasPrice = item.extraIngredients?.reduce((sum, ing) => sum + (ing.price || 0), 0) || 0;
+      const unitPrice = item.menuItem.price + extrasPrice;
+      return {
+        id: `oi-${Date.now()}-${index}`,
+        menuItemId: item.menuItem.id,
+        menuItem: item.menuItem,
+        quantity: item.quantity,
+        notes: item.notes,
+        unitPrice,
+        subtotal: unitPrice * item.quantity,
+        removedIngredients: item.removedIngredients,
+        extraIngredients: item.extraIngredients,
+      };
+    });
 
     const maxPrepTime = Math.max(
       ...cart.items.map(item => item.menuItem.preparationTime || 15)
@@ -227,6 +290,52 @@ export const MenuPage: React.FC = () => {
       {itemAdded && (
         <div className="item-added-toast">
           <span>✓</span> {itemAdded} agregado al pedido
+        </div>
+      )}
+
+      {/* Modal de personalización de ingredientes */}
+      {selectedItem && (
+        <div className="ingredient-modal-overlay" onClick={handleCancelItem}>
+          <div onClick={(e) => e.stopPropagation()}>
+          <Card className="ingredient-modal" variant="elevated">
+            <div className="ingredient-modal-header">
+              <h3>Personalizar pedido</h3>
+              <button className="modal-close" onClick={handleCancelItem}>×</button>
+            </div>
+
+            <div className="ingredient-modal-item">
+              <span className="item-name">{selectedItem.name}</span>
+              <span className="item-base-price">{formatPrice(selectedItem.price)}</span>
+            </div>
+
+            <div className="ingredient-modal-content">
+              <IngredientSelector
+                menuItem={selectedItem}
+                removedIngredients={removedIngredients}
+                extraIngredients={extraIngredients}
+                onToggleRemoved={handleToggleRemoved}
+                onToggleExtra={handleToggleExtra}
+                notes={itemNotes}
+                onNotesChange={setItemNotes}
+              />
+            </div>
+
+            <div className="ingredient-modal-footer">
+              <div className="modal-total">
+                <span>Total:</span>
+                <span className="total-price">{formatPrice(getItemTotalPrice())}</span>
+              </div>
+              <div className="modal-actions">
+                <Button variant="ghost" onClick={handleCancelItem}>
+                  Cancelar
+                </Button>
+                <Button variant="success" onClick={handleConfirmItem}>
+                  Agregar al pedido
+                </Button>
+              </div>
+            </div>
+          </Card>
+          </div>
         </div>
       )}
 

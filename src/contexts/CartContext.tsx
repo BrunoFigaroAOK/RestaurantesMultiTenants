@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import type { Cart, CartItem, CartContextType, MenuItem, OrderType } from '../types';
+import type { Cart, CartItem, CartContextType, MenuItem, OrderType, Ingredient } from '../types';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -22,27 +22,47 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   }, []);
 
-  const addToCart = useCallback((menuItem: MenuItem, quantity = 1, notes?: string) => {
+  const addToCart = useCallback((
+    menuItem: MenuItem,
+    quantity = 1,
+    notes?: string,
+    removedIngredients?: Ingredient[],
+    extraIngredients?: Ingredient[]
+  ) => {
     setCart(prev => {
       if (!prev) return prev;
 
-      const existingIndex = prev.items.findIndex(item => item.menuItem.id === menuItem.id);
+      // Si hay modificaciones de ingredientes, siempre agregar como item nuevo
+      const hasCustomization = (removedIngredients && removedIngredients.length > 0) ||
+                               (extraIngredients && extraIngredients.length > 0) ||
+                               (notes && notes.trim().length > 0);
 
-      if (existingIndex >= 0) {
-        // Ya existe, incrementar cantidad
-        const newItems = [...prev.items];
-        newItems[existingIndex] = {
-          ...newItems[existingIndex],
-          quantity: newItems[existingIndex].quantity + quantity,
-        };
-        return { ...prev, items: newItems };
+      if (!hasCustomization) {
+        // Sin personalización: buscar item existente sin personalización
+        const existingIndex = prev.items.findIndex(item =>
+          item.menuItem.id === menuItem.id &&
+          !item.removedIngredients?.length &&
+          !item.extraIngredients?.length &&
+          !item.notes?.trim()
+        );
+
+        if (existingIndex >= 0) {
+          const newItems = [...prev.items];
+          newItems[existingIndex] = {
+            ...newItems[existingIndex],
+            quantity: newItems[existingIndex].quantity + quantity,
+          };
+          return { ...prev, items: newItems };
+        }
       }
 
-      // Nuevo item
+      // Nuevo item (con o sin personalización)
       const newItem: CartItem = {
         menuItem,
         quantity,
         notes,
+        removedIngredients,
+        extraIngredients,
       };
       return { ...prev, items: [...prev.items, newItem] };
     });
@@ -96,10 +116,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const getTotal = useCallback((): number => {
     if (!cart) return 0;
-    return cart.items.reduce(
-      (total, item) => total + item.menuItem.price * item.quantity,
-      0
-    );
+    return cart.items.reduce((total, item) => {
+      const basePrice = item.menuItem.price;
+      const extrasPrice = item.extraIngredients?.reduce((sum, ing) => sum + (ing.price || 0), 0) || 0;
+      return total + (basePrice + extrasPrice) * item.quantity;
+    }, 0);
   }, [cart]);
 
   const getItemCount = useCallback((): number => {

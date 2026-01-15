@@ -1,4 +1,45 @@
-import type { Restaurant, Table, MenuCategory, MenuItem, Order } from '../types';
+import type { Restaurant, Table, MenuCategory, MenuItem, Order, Ingredient } from '../types';
+
+// ==========================================
+// INGREDIENTES REUTILIZABLES
+// ==========================================
+
+const ingredientesParrilla: Ingredient[] = [
+  { id: 'ing-chimichurri', name: 'Chimichurri', type: 'removable' },
+  { id: 'ing-sal', name: 'Sal', type: 'removable' },
+  { id: 'ing-limon', name: 'Limón', type: 'removable' },
+  { id: 'ing-huevo', name: 'Huevo frito', type: 'extra', price: 800 },
+  { id: 'ing-bacon', name: 'Bacon', type: 'extra', price: 1200 },
+  { id: 'ing-queso-provolone', name: 'Provolone', type: 'extra', price: 1500 },
+];
+
+const ingredientesEnsalada: Ingredient[] = [
+  { id: 'ing-cebolla', name: 'Cebolla', type: 'removable' },
+  { id: 'ing-tomate', name: 'Tomate', type: 'removable' },
+  { id: 'ing-lechuga', name: 'Lechuga', type: 'removable' },
+  { id: 'ing-aceitunas', name: 'Aceitunas', type: 'extra', price: 500 },
+  { id: 'ing-huevo-duro', name: 'Huevo duro', type: 'extra', price: 600 },
+];
+
+const ingredientesPizza: Ingredient[] = [
+  { id: 'ing-oregano', name: 'Orégano', type: 'removable' },
+  { id: 'ing-ajo', name: 'Ajo', type: 'removable' },
+  { id: 'ing-aceituna-pizza', name: 'Aceitunas', type: 'removable' },
+  { id: 'ing-extra-muzza', name: 'Extra muzzarella', type: 'extra', price: 1500 },
+  { id: 'ing-jamon', name: 'Jamón', type: 'extra', price: 1200 },
+  { id: 'ing-morron', name: 'Morrón', type: 'extra', price: 800 },
+  { id: 'ing-anchoas', name: 'Anchoas', type: 'extra', price: 1800 },
+];
+
+const ingredientesSushi: Ingredient[] = [
+  { id: 'ing-palta', name: 'Palta', type: 'removable' },
+  { id: 'ing-queso-crema', name: 'Queso crema', type: 'removable' },
+  { id: 'ing-pepino', name: 'Pepino', type: 'removable' },
+  { id: 'ing-sesamo', name: 'Sésamo', type: 'removable' },
+  { id: 'ing-extra-salmon', name: 'Extra salmón', type: 'extra', price: 1500 },
+  { id: 'ing-tempura-bits', name: 'Tempura bits', type: 'extra', price: 600 },
+  { id: 'ing-salsa-teriyaki', name: 'Salsa teriyaki', type: 'extra', price: 400 },
+];
 
 // ==========================================
 // RESTAURANTES
@@ -89,15 +130,15 @@ export const menuItems: MenuItem[] = [
   { id: 'item-003', restaurantId: 'rest-001', categoryId: 'cat-001', name: 'Tabla de achuras', description: 'Chorizo, morcilla, chinchu y mollejas', price: 8500, isAvailable: true, preparationTime: 15 },
 
   // La Parrilla de Juan - Parrilla
-  { id: 'item-004', restaurantId: 'rest-001', categoryId: 'cat-002', name: 'Bife de chorizo', description: '400g de corte premium', price: 12500, isAvailable: true, preparationTime: 25 },
-  { id: 'item-005', restaurantId: 'rest-001', categoryId: 'cat-002', name: 'Ojo de bife', description: '350g con hueso', price: 14000, isAvailable: true, preparationTime: 25 },
-  { id: 'item-006', restaurantId: 'rest-001', categoryId: 'cat-002', name: 'Entraña', description: '300g corte jugoso', price: 11000, isAvailable: true, preparationTime: 20 },
-  { id: 'item-007', restaurantId: 'rest-001', categoryId: 'cat-002', name: 'Vacío', description: '400g con cuero crocante', price: 10500, isAvailable: false, preparationTime: 30 },
-  { id: 'item-008', restaurantId: 'rest-001', categoryId: 'cat-002', name: 'Parrillada para 2', description: 'Asado, vacío, chorizo, morcilla y achuras', price: 22000, isAvailable: true, preparationTime: 35 },
+  { id: 'item-004', restaurantId: 'rest-001', categoryId: 'cat-002', name: 'Bife de chorizo', description: '400g de corte premium', price: 12500, isAvailable: true, preparationTime: 25, ingredients: ingredientesParrilla },
+  { id: 'item-005', restaurantId: 'rest-001', categoryId: 'cat-002', name: 'Ojo de bife', description: '350g con hueso', price: 14000, isAvailable: true, preparationTime: 25, ingredients: ingredientesParrilla },
+  { id: 'item-006', restaurantId: 'rest-001', categoryId: 'cat-002', name: 'Entraña', description: '300g corte jugoso', price: 11000, isAvailable: true, preparationTime: 20, ingredients: ingredientesParrilla },
+  { id: 'item-007', restaurantId: 'rest-001', categoryId: 'cat-002', name: 'Vacío', description: '400g con cuero crocante', price: 10500, isAvailable: false, preparationTime: 30, ingredients: ingredientesParrilla },
+  { id: 'item-008', restaurantId: 'rest-001', categoryId: 'cat-002', name: 'Parrillada para 2', description: 'Asado, vacío, chorizo, morcilla y achuras', price: 22000, isAvailable: true, preparationTime: 35, ingredients: ingredientesParrilla },
 
   // La Parrilla de Juan - Guarniciones
   { id: 'item-009', restaurantId: 'rest-001', categoryId: 'cat-003', name: 'Papas fritas', description: 'Porción generosa', price: 3000, isAvailable: true, preparationTime: 12 },
-  { id: 'item-010', restaurantId: 'rest-001', categoryId: 'cat-003', name: 'Ensalada mixta', description: 'Lechuga, tomate, cebolla', price: 2500, isAvailable: true, preparationTime: 5 },
+  { id: 'item-010', restaurantId: 'rest-001', categoryId: 'cat-003', name: 'Ensalada mixta', description: 'Lechuga, tomate, cebolla', price: 2500, isAvailable: true, preparationTime: 5, ingredients: ingredientesEnsalada },
   { id: 'item-011', restaurantId: 'rest-001', categoryId: 'cat-003', name: 'Puré de papas', description: 'Casero y cremoso', price: 2800, isAvailable: true, preparationTime: 5 },
 
   // La Parrilla de Juan - Bebidas
@@ -110,14 +151,14 @@ export const menuItems: MenuItem[] = [
   { id: 'item-016', restaurantId: 'rest-001', categoryId: 'cat-005', name: 'Panqueques', description: 'Con dulce de leche', price: 3800, isAvailable: true, preparationTime: 10 },
 
   // Sushi Master - Rolls Clásicos
-  { id: 'item-017', restaurantId: 'rest-002', categoryId: 'cat-006', name: 'Philadelphia Roll', description: 'Salmón, queso crema, palta (10 piezas)', price: 6500, isAvailable: true, preparationTime: 15 },
-  { id: 'item-018', restaurantId: 'rest-002', categoryId: 'cat-006', name: 'California Roll', description: 'Kanikama, palta, pepino (10 piezas)', price: 5500, isAvailable: true, preparationTime: 12 },
-  { id: 'item-019', restaurantId: 'rest-002', categoryId: 'cat-006', name: 'Sake Roll', description: 'Salmón y palta (10 piezas)', price: 6000, isAvailable: true, preparationTime: 12 },
+  { id: 'item-017', restaurantId: 'rest-002', categoryId: 'cat-006', name: 'Philadelphia Roll', description: 'Salmón, queso crema, palta (10 piezas)', price: 6500, isAvailable: true, preparationTime: 15, ingredients: ingredientesSushi },
+  { id: 'item-018', restaurantId: 'rest-002', categoryId: 'cat-006', name: 'California Roll', description: 'Kanikama, palta, pepino (10 piezas)', price: 5500, isAvailable: true, preparationTime: 12, ingredients: ingredientesSushi },
+  { id: 'item-019', restaurantId: 'rest-002', categoryId: 'cat-006', name: 'Sake Roll', description: 'Salmón y palta (10 piezas)', price: 6000, isAvailable: true, preparationTime: 12, ingredients: ingredientesSushi },
 
   // Sushi Master - Rolls Premium
-  { id: 'item-020', restaurantId: 'rest-002', categoryId: 'cat-007', name: 'Dragon Roll', description: 'Langostino, palta, salsa unagi (10 piezas)', price: 9500, isAvailable: true, preparationTime: 18 },
-  { id: 'item-021', restaurantId: 'rest-002', categoryId: 'cat-007', name: 'Rainbow Roll', description: 'Mix de pescados sobre California (10 piezas)', price: 10500, isAvailable: true, preparationTime: 20 },
-  { id: 'item-022', restaurantId: 'rest-002', categoryId: 'cat-007', name: 'Spicy Tuna Roll', description: 'Atún picante, tempura bits (10 piezas)', price: 8500, isAvailable: false, preparationTime: 15 },
+  { id: 'item-020', restaurantId: 'rest-002', categoryId: 'cat-007', name: 'Dragon Roll', description: 'Langostino, palta, salsa unagi (10 piezas)', price: 9500, isAvailable: true, preparationTime: 18, ingredients: ingredientesSushi },
+  { id: 'item-021', restaurantId: 'rest-002', categoryId: 'cat-007', name: 'Rainbow Roll', description: 'Mix de pescados sobre California (10 piezas)', price: 10500, isAvailable: true, preparationTime: 20, ingredients: ingredientesSushi },
+  { id: 'item-022', restaurantId: 'rest-002', categoryId: 'cat-007', name: 'Spicy Tuna Roll', description: 'Atún picante, tempura bits (10 piezas)', price: 8500, isAvailable: false, preparationTime: 15, ingredients: ingredientesSushi },
 
   // Sushi Master - Niguiris
   { id: 'item-023', restaurantId: 'rest-002', categoryId: 'cat-008', name: 'Niguiri Salmón (x2)', description: 'Salmón fresco sobre arroz', price: 3500, isAvailable: true, preparationTime: 8 },
@@ -130,14 +171,14 @@ export const menuItems: MenuItem[] = [
   { id: 'item-028', restaurantId: 'rest-002', categoryId: 'cat-009', name: 'Cerveza Asahi', description: 'Lata 500ml', price: 3500, isAvailable: true, preparationTime: 1 },
 
   // Pizzería Napoli - Pizzas Clásicas
-  { id: 'item-029', restaurantId: 'rest-003', categoryId: 'cat-010', name: 'Muzzarella', description: 'Salsa, muzzarella y orégano', price: 7500, isAvailable: true, preparationTime: 20 },
-  { id: 'item-030', restaurantId: 'rest-003', categoryId: 'cat-010', name: 'Napolitana', description: 'Muzzarella, tomate y ajo', price: 8000, isAvailable: true, preparationTime: 20 },
-  { id: 'item-031', restaurantId: 'rest-003', categoryId: 'cat-010', name: 'Fugazzeta', description: 'Muzzarella y cebolla', price: 8500, isAvailable: true, preparationTime: 22 },
+  { id: 'item-029', restaurantId: 'rest-003', categoryId: 'cat-010', name: 'Muzzarella', description: 'Salsa, muzzarella y orégano', price: 7500, isAvailable: true, preparationTime: 20, ingredients: ingredientesPizza },
+  { id: 'item-030', restaurantId: 'rest-003', categoryId: 'cat-010', name: 'Napolitana', description: 'Muzzarella, tomate y ajo', price: 8000, isAvailable: true, preparationTime: 20, ingredients: ingredientesPizza },
+  { id: 'item-031', restaurantId: 'rest-003', categoryId: 'cat-010', name: 'Fugazzeta', description: 'Muzzarella y cebolla', price: 8500, isAvailable: true, preparationTime: 22, ingredients: ingredientesPizza },
 
   // Pizzería Napoli - Pizzas Especiales
-  { id: 'item-032', restaurantId: 'rest-003', categoryId: 'cat-011', name: 'Cuatro Quesos', description: 'Muzzarella, roquefort, parmesano, fontina', price: 10500, isAvailable: true, preparationTime: 22 },
-  { id: 'item-033', restaurantId: 'rest-003', categoryId: 'cat-011', name: 'Calabresa', description: 'Muzzarella y longaniza calabresa', price: 9500, isAvailable: true, preparationTime: 22 },
-  { id: 'item-034', restaurantId: 'rest-003', categoryId: 'cat-011', name: 'Jamón y Morrones', description: 'Muzzarella, jamón y morrones asados', price: 9500, isAvailable: true, preparationTime: 22 },
+  { id: 'item-032', restaurantId: 'rest-003', categoryId: 'cat-011', name: 'Cuatro Quesos', description: 'Muzzarella, roquefort, parmesano, fontina', price: 10500, isAvailable: true, preparationTime: 22, ingredients: ingredientesPizza },
+  { id: 'item-033', restaurantId: 'rest-003', categoryId: 'cat-011', name: 'Calabresa', description: 'Muzzarella y longaniza calabresa', price: 9500, isAvailable: true, preparationTime: 22, ingredients: ingredientesPizza },
+  { id: 'item-034', restaurantId: 'rest-003', categoryId: 'cat-011', name: 'Jamón y Morrones', description: 'Muzzarella, jamón y morrones asados', price: 9500, isAvailable: true, preparationTime: 22, ingredients: ingredientesPizza },
 
   // Pizzería Napoli - Empanadas
   { id: 'item-035', restaurantId: 'rest-003', categoryId: 'cat-012', name: 'Empanada Carne', description: 'Carne cortada a cuchillo', price: 1200, isAvailable: true, preparationTime: 10 },
